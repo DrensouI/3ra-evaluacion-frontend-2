@@ -35,6 +35,8 @@ export interface DashboardProps {
   reportes: Reporte[];
   alNavegarDetalle: (idObra: string) => void;
   alNavegarPestaña: (pestaña: string) => void;
+  logout: () => void;
+  usuario: SesionUsuario | null;
 }
 
 export interface ReportesSectionProps {

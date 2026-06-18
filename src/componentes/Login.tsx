@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './login.css';
 
 export default function Login() {
-  const { login, errorLogin } = useAuth();
+  const { login, errorLogin, estaAutenticado } = useAuth();
   const [correo, setCorreo] = useState('admin@admin.com');
   const [clave, setClave] = useState('123456');
   const [mostrarClave, setMostrarClave] = useState(false);
@@ -37,6 +37,12 @@ export default function Login() {
       setErrorLocal('Ocurrió un error al intentar iniciar sesión. Intente nuevamente.');
     }
   };
+
+  useEffect(() => {
+    if (estaAutenticado) {
+      navigate('/dashboard');
+    }
+  }, [estaAutenticado, navigate]);
 
   return (
     <div id="pagina-login">

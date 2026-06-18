@@ -28,5 +28,5 @@
     "**/*.tsx",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", ".next"]
+  "exclude": ["node_modules", ".next", "next.config.ts", "src/componentes/layout.tsx"]
 }

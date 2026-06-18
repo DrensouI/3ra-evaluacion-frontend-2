@@ -1,15 +1,48 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './componentes/Login';
+import Dashboard from './componentes/Dashboard';
+import { Almacenamiento } from './utils';
 
-function Dashboard() {
+function ProtectedRoute({ children }: { children: JSX.Element }) {
+  const { estaAutenticado } = useAuth();
+  if (!estaAutenticado) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
+
+function DashboardWrapper() {
+  const navigate = useNavigate();
+  const { logout, usuario } = useAuth();
+  const obras = Almacenamiento.obtenerObras();
+  const personal = Almacenamiento.obtenerPersonal();
+  const reportes = Almacenamiento.obtenerReportes();
+
+  const alNavegarDetalle = (id: string) => {
+    navigate('/dashboard');
+  };
+  const alNavegarPestaña = (pestaña: string) => {
+    console.log('Navegar a pestaña', pestaña);
+  };
+
+  const cerrarSesion = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
-    <div style={{padding:40}}>
-      <h1>Dashboard (placeholder)</h1>
-      <p>Has iniciado sesión correctamente.</p>
-    </div>
+    <Dashboard
+      obras={obras}
+      personal={personal}
+      reportes={reportes}
+      alNavegarDetalle={alNavegarDetalle}
+      alNavegarPestaña={alNavegarPestaña}
+      logout={cerrarSesion}
+      usuario={usuario}
+    />
   );
 }
 
@@ -21,7 +54,15 @@ root.render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardWrapper />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
