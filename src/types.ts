@@ -28,11 +28,7 @@ export interface SesionUsuario {
   rol: string;
 }
 
-// ==========================================
-// PROPS DEL GRUPO DE DESARROLLO (EVALUACIÓN 3)
-// ==========================================
 
-// Props de tu sección: Dashboard
 export interface DashboardProps {
   obras: Obra[];
   personal: Personal[];
@@ -41,7 +37,6 @@ export interface DashboardProps {
   alNavegarPestaña: (pestaña: string) => void;
 }
 
-// Props de tu sección: ReportesSection (Bitácora de Informes)
 export interface ReportesSectionProps {
   obras: Obra[];
   reportes: Reporte[];
@@ -63,7 +58,6 @@ export interface ObrasSectionProps {
   alEliminarReporte?: (id: string) => void;
 }
 
-// Props de tus compañeros: PersonalSection
 export interface PersonalSectionProps {
   personal: Personal[];
   obras: Obra[];
