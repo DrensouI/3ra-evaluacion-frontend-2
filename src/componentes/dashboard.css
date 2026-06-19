@@ -1,3 +1,77 @@
+/*--------------------------------------------- 
+SECCION DEL SIDEBAR
+-----------------------------------------------*/
+
+
+  /*--------------------------------------------- 
+  LOGO DE LA EMPRESA
+  -----------------------------------------------*/
+
+/* --- ESTILOS PARA EL LOGO PNG --- */
+
+.sidebar-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;                        
+  margin-bottom: 24px;              
+  padding-bottom: 16px;
+  border-bottom: 1px solid #dc2626; 
+}
+
+.sidebar-logo-png {
+  width: 210px;                      
+  height: auto;
+  object-fit: contain;
+  
+
+}
+
+
+/*--------------------------------------------- 
+ESTILO DEL SIDEBAR
+-----------------------------------------------*/
+
+/* Elimina los bordes que se crean en los lados de la barra */
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.mi-barra-lateral {
+  width: 250px;
+  background-color: #910000; 
+  color: white;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  border-right: 0,9px solid rgba(78, 0, 0, 0.986);
+
+  position: relative;  
+  z-index: 10;
+  box-shadow: 10px 0 30px rgba(15, 23, 42, 0.27);   
+}
+
+.titulo-menu {
+  margin-bottom: 30px;
+}
+
+.boton-menu {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  background-color: #334155;
+  color: white;
+  border: none;
+  border-radius: 6px;
+}
+
+/*--------------------------------------------- 
+¿LO DEMAS DE LA PAGINA?
+-----------------------------------------------*/
+
 .dashboard-page {
   min-height: 100vh;
   padding: 32px;

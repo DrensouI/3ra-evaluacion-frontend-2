@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './componentes/Login';
 import Dashboard from './componentes/Dashboard';
 import { Almacenamiento } from './utils';
+import SideBar from './componentes/sidebar';
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { estaAutenticado } = useAuth();
@@ -34,15 +35,20 @@ function DashboardWrapper() {
   };
 
   return (
-    <Dashboard
-      obras={obras}
-      personal={personal}
-      reportes={reportes}
-      alNavegarDetalle={alNavegarDetalle}
-      alNavegarPestaña={alNavegarPestaña}
-      logout={cerrarSesion}
-      usuario={usuario}
-    />
+    <div style={{ display: 'flex' }}>
+      <SideBar />
+      <div style={{ flex: 1 }}>
+        <Dashboard
+          obras={obras}
+          personal={personal}
+          reportes={reportes}
+          alNavegarDetalle={alNavegarDetalle}
+          alNavegarPestaña={alNavegarPestaña}
+          logout={cerrarSesion}
+          usuario={usuario}
+        />
+      </div>
+    </div>
   );
 }
 
