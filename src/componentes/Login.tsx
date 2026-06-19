@@ -1,8 +1,9 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './login.css';
 
+// Componente reutilizable para dibujar los íconos sin repetir código SVG
 const Icon = ({ children }: { children: React.ReactNode }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
     {children}
@@ -10,39 +11,55 @@ const Icon = ({ children }: { children: React.ReactNode }) => (
 );
 
 export default function Login() {
-  const [form, setForm] = useState({ correo: 'admin@admin.com', clave: '123456' });
-  const [mostrarClave, setMostrarClave] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // --- ESTADOS DEL COMPONENTE ---
+  // Guarda lo que el usuario escribe en los inputs
+  const [credenciales, setCredenciales] = useState({ correo: 'admin@admin.com', clave: '123456' });
+  // Controla si la contraseña se ve como texto o como asteriscos
+  const [mostrarContrasena, setMostrarContrasena] = useState(false);
+  // Guarda el texto de error si el usuario se equivoca
+  const [mensajeError, setMensajeError] = useState<string | null>(null);
+  
+  // --- HOOKS DE NAVEGACIÓN Y AUTENTICACIÓN ---
   const { login, errorLogin, estaAutenticado } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Permite cambiar de ruta (ej: ir al dashboard)
 
-  useEffect(() => {
-    if (estaAutenticado) navigate('/dashboard');
+  // Efecto: Si el sistema detecta que el usuario ya está logueado, lo patea directo al dashboard
+  useEffect(() => { 
+    if (estaAutenticado) navigate('/dashboard'); 
   }, [estaAutenticado, navigate]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  // Función: Actualiza el estado 'credenciales' en tiempo real mientras el usuario escribe
+  const manejarCambioInput = (e: React.ChangeEvent<HTMLInputElement>) => 
+    setCredenciales({ ...credenciales, [e.target.name]: e.target.value });
 
-  const manejarEnvio = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-
-    const correoTrim = form.correo.trim();
-    if (!correoTrim.includes('@') || !correoTrim.includes('.')) return setError('Por favor ingrese un formato de correo electrónico válido.');
-    if (form.clave.length < 4) return setError('La contraseña debe contener al menos 4 caracteres.');
-
-    if (login(correoTrim, form.clave)) {
+  // Función: Se ejecuta cuando el usuario hace clic en "Iniciar Sesión"
+  const manejarEnvio = (e: React.FormEvent) => {
+    e.preventDefault(); // Evita que la página web parpadee/recargue al enviar el formulario
+    
+    const correoLimpio = credenciales.correo.trim(); // Borra espacios en blanco accidentales
+    
+    // 1. Validaciones básicas antes de consultar a la base de datos/contexto
+    if (!correoLimpio.includes('@') || !correoLimpio.includes('.')) {
+      return setMensajeError('Formato de correo electrónico inválido.');
+    }
+    if (credenciales.clave.length < 4) {
+      return setMensajeError('La contraseña debe contener al menos 4 caracteres.');
+    }
+    
+    // 2. Intento de Login: Si es exitoso va al dashboard, sino, muestra el error
+    const accesoExitoso = login(correoLimpio, credenciales.clave);
+    if (accesoExitoso) {
       navigate('/dashboard');
     } else {
-      setError('Credenciales incorrectas. Verifique los datos de ingreso.');
+      setMensajeError('Credenciales incorrectas. Verifique los datos.');
     }
   };
 
   return (
     <div id="pagina-login">
       <div className="hexacall-card">
+        
+        {/* ENCABEZADO LOGO */}
         <div className="auth-brand">
           <div className="hexacall-logo">
             <Icon>
@@ -55,64 +72,47 @@ export default function Login() {
           <p className="hexacall-subtitle">Portal de Acceso Interno</p>
         </div>
 
-        <form onSubmit={manejarEnvio} id="formulario-login">
+        {/* FORMULARIO */}
+        <form onSubmit={manejarEnvio}>
+          
           <div className="form-group">
-            <label className="field-label" htmlFor="correo-login">Correo Electrónico</label>
+            <label className="field-label">Correo Electrónico</label>
             <div className="input-wrapper">
               <span className="input-icon">
-                <Icon>
-                  <rect x="2" y="4" width="20" height="16" rx="2" />
-                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                </Icon>
+                <Icon><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></Icon>
               </span>
-              <input
-                id="correo-login"
-                name="correo"
-                type="email"
-                required
-                placeholder="admin@admin.com"
-                value={form.correo}
-                onChange={handleChange}
-                className="hexacall-input"
-              />
+              <input name="correo" type="email" required placeholder="admin@admin.com" value={credenciales.correo} onChange={manejarCambioInput} className="hexacall-input" />
             </div>
           </div>
 
           <div className="form-group">
-            <label className="field-label" htmlFor="clave-login">Contraseña</label>
+            <label className="field-label">Contraseña</label>
             <div className="input-wrapper">
               <span className="input-icon">
-                <Icon>
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </Icon>
+                <Icon><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></Icon>
               </span>
-              <input
-                id="clave-login"
-                name="clave"
-                type={mostrarClave ? 'text' : 'password'}
-                required
-                placeholder="••••••••"
-                value={form.clave}
-                onChange={handleChange}
-                className="hexacall-input"
-              />
-              <button type="button" className="toggle-password" onClick={() => setMostrarClave((prev) => !prev)}>
-                {mostrarClave ? '🙈' : '👁️'}
+              <input name="clave" type={mostrarContrasena ? 'text' : 'password'} required placeholder="••••••••" value={credenciales.clave} onChange={manejarCambioInput} className="hexacall-input" />
+              <button type="button" className="toggle-password" onClick={() => setMostrarContrasena(!mostrarContrasena)}>
+                {mostrarContrasena ? '🙈' : '👁️'}
               </button>
             </div>
           </div>
 
-          {(error || errorLogin) && <div className="alert-box">{error || errorLogin}</div>}
+          {/* CAJA DE ERROR: Solo aparece si hay un error guardado en el estado */}
+          {(mensajeError || errorLogin) && (
+            <div className="alert-box">{mensajeError || errorLogin}</div>
+          )}
 
-          <button id="boton-instancia-login" type="submit" className="hexacall-btn">Iniciar Sesión</button>
+          <button type="submit" className="hexacall-btn">Iniciar Sesión</button>
         </form>
 
+        {/* NOTA DE AYUDA (FOOTER) */}
         <div className="hexacall-footer">
-          Credenciales válidas de prueba:
-          <div className="cred-badge">admin@admin.com</div> / 123456
-          <div className="cred-badge">soporte@hexacall.cl</div> / 654321
+          Credenciales válidas de prueba:<br/>
+          <span className="cred-badge">admin@admin.com</span> / 123456<br/>
+          <span className="cred-badge">soporte@hexacall.cl</span> / 654321
         </div>
+
       </div>
     </div>
   );
