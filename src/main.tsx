@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-route
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './componentes/Login';
 import Dashboard from './componentes/Dashboard';
+import ObrasYProyectos from './componentes/ObrasYProyectos';
 import { Almacenamiento } from './utils';
 import SideBar from './componentes/sidebar';
 
@@ -52,6 +53,23 @@ function DashboardWrapper() {
   );
 }
 
+function ObrasWrapper() {
+  const { logout } = useAuth();
+  const cerrarSesion = () => {
+    logout();
+    window.location.href = '/';
+  };
+
+  return (
+    <div style={{ display: 'flex' }}>
+      <SideBar />
+      <div style={{ flex: 1 }}>
+        <ObrasYProyectos />
+      </div>
+    </div>
+  );
+}
+
 const root = createRoot(document.getElementById('root') as HTMLElement);
 
 root.render(
@@ -65,6 +83,42 @@ root.render(
             element={
               <ProtectedRoute>
                 <DashboardWrapper />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/obras"
+            element={
+              <ProtectedRoute>
+                <ObrasWrapper />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/empleados"
+            element={
+              <ProtectedRoute>
+                <div style={{ display: 'flex' }}>
+                  <SideBar />
+                  <div style={{ flex: 1, padding: '2rem', background: '#f8f9fa', minHeight: '100vh' }}>
+                    <h1>Sección de Empleados</h1>
+                    <p>Esta sección está en desarrollo.</p>
+                  </div>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reportes"
+            element={
+              <ProtectedRoute>
+                <div style={{ display: 'flex' }}>
+                  <SideBar />
+                  <div style={{ flex: 1, padding: '2rem', background: '#f8f9fa', minHeight: '100vh' }}>
+                    <h1>Sección de Reportes</h1>
+                    <p>Esta sección está en desarrollo.</p>
+                  </div>
+                </div>
               </ProtectedRoute>
             }
           />
