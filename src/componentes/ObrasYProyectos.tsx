@@ -77,12 +77,20 @@ export default function ObrasYProyectos() {
           <h1 id="obras-title">Obras y Proyectos</h1>
           <p id="obras-summary">Control global de obras de desarrollo, estados o presupuestos.</p>
         </div>
-        <button className="btn-crear" onClick={abrirCrear} title="Crear nueva obra (Alt+N)" aria-label="Crear nueva obra">
+        <button
+          className="btn-crear"
+          onClick={abrirCrear}
+          title="Crear nueva obra (Alt+N)"
+          aria-label="Crear nueva obra"
+          aria-expanded={mostrar}
+          aria-controls="obra-form"
+          type="button"
+        >
           + Registrar
         </button>
       </div>
 
-      <div className="stats" role="region" aria-label="Estadísticas de obras">
+      <div className="stats" role="status" aria-label="Estadísticas de obras" aria-live="polite">
         {stats.map((s, i) => (
           <div key={i} className="stat">
             <div className="stat-label">{s.label}</div>
@@ -98,7 +106,7 @@ export default function ObrasYProyectos() {
         ) : (
           <div className="grid">
             {obras.map(o => (
-              <div key={o.id} className="tarjeta" tabIndex={0} role="article" aria-labelledby={`obra-${o.id}-titulo`}>
+              <article key={o.id} className="tarjeta" tabIndex={0} aria-labelledby={`obra-${o.id}-titulo`}>
                 <h3 id={`obra-${o.id}-titulo`}>{o.nombre}</h3>
                 <span className={`estado ${o.estado.replace(' ', '-')}`}>{o.estado}</span>
                 {o.ubicacion && <p className="ubicacion" title={o.ubicacion}>📍 {o.ubicacion}</p>}
@@ -117,7 +125,7 @@ export default function ObrasYProyectos() {
                   <button className="btn btn-edit" onClick={() => abrirEditar(o)} title="Editar obra" aria-label={`Editar obra ${o.nombre}`}>✎</button>
                   <button className="btn btn-del" onClick={() => eliminar(o.id)} title="Eliminar obra" aria-label={`Eliminar obra ${o.nombre}`}>🗑</button>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         )}
@@ -131,14 +139,51 @@ export default function ObrasYProyectos() {
               <button className="btn-x" onClick={cerrarModal} type="button" title="Cerrar (Esc)" aria-label="Cerrar diálogo">✕</button>
             </div>
             <p id="modal-description" className="sr-only">Formulario para crear o editar una obra.</p>
-            <form onSubmit={guardar} onKeyDown={handleKeyDown} aria-label="Formulario de obra">
-              <label>Nombre * <input type="text" ref={nombreInputRef} required aria-required="true" placeholder="Obra" value={form.nombre} onChange={e => setForm({...form, nombre: e.target.value})} /></label>
-              <label>Ubicación <input type="text" placeholder="Ubicación" value={form.ubicacion} onChange={e => setForm({...form, ubicacion: e.target.value})} /></label>
-              <label>Estado <select value={form.estado} onChange={e => setForm({...form, estado: e.target.value as EstadoObra})}><option value="en curso">En Curso</option><option value="pausada">Pausada</option><option value="finalizada">Finalizada</option></select></label>
-              <label>Presupuesto <input type="number" min="0" placeholder="0" value={form.presupuesto} onChange={e => setForm({...form, presupuesto: e.target.value})} /></label>
+            <form id="obra-form" onSubmit={guardar} onKeyDown={handleKeyDown} aria-label="Formulario de obra">
+              <label htmlFor="obra-nombre">Nombre *</label>
+              <input
+                id="obra-nombre"
+                type="text"
+                ref={nombreInputRef}
+                required
+                aria-required="true"
+                placeholder="Obra"
+                value={form.nombre}
+                onChange={e => setForm({...form, nombre: e.target.value})}
+              />
+
+              <label htmlFor="obra-ubicacion">Ubicación</label>
+              <input
+                id="obra-ubicacion"
+                type="text"
+                placeholder="Ubicación"
+                value={form.ubicacion}
+                onChange={e => setForm({...form, ubicacion: e.target.value})}
+              />
+
+              <label htmlFor="obra-estado">Estado</label>
+              <select
+                id="obra-estado"
+                value={form.estado}
+                onChange={e => setForm({...form, estado: e.target.value as EstadoObra})}
+              >
+                <option value="en curso">En Curso</option>
+                <option value="pausada">Pausada</option>
+                <option value="finalizada">Finalizada</option>
+              </select>
+
+              <label htmlFor="obra-presupuesto">Presupuesto</label>
+              <input
+                id="obra-presupuesto"
+                type="number"
+                min="0"
+                placeholder="0"
+                value={form.presupuesto}
+                onChange={e => setForm({...form, presupuesto: e.target.value})}
+              />
               <div className="form-btns">
-                <button type="button" onClick={cerrarModal}>Cancelar</button>
-                <button type="submit">{editando ? 'Actualizar' : 'Guardar'}</button>
+                <button type="button" onClick={cerrarModal} aria-label="Cancelar">Cancelar</button>
+                <button type="submit" aria-label={editando ? 'Actualizar obra' : 'Guardar obra'}>{editando ? 'Actualizar' : 'Guardar'}</button>
               </div>
             </form>
           </div>
