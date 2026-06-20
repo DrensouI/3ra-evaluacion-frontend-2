@@ -10,7 +10,16 @@
 * { box-sizing: border-box; }
 
 *:focus-visible { outline: 3px solid var(--b); outline-offset: 2px; }
-
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
 .obras-container { padding: 2rem; background: var(--s); min-height: 100vh; }
 
 .obras-header { display: flex; justify-content: space-between; align-items: center; margin: 0 0 2rem; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }

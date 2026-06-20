@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { SesionUsuario } from '../types';
 
+const CLAVE_SESION = 'hexacall_sesion';
+const CLAVE_USUARIOS = 'hexacall_usuarios_registrados';
+
 interface AuthContextType {
   usuario: SesionUsuario | null;
   estaAutenticado: boolean;
@@ -14,7 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Credenciales registradas por defecto en el sistema
 const USUARIOS_PREDEFINIDOS = [
   { correo: 'admin@admin.com', clave: '123456', nombre: 'Luis Alberto Rojas', rol: 'administrador' },
-  { correo: 'soporte@obraspro.cl', clave: '654321', nombre: 'Alonso Ignacio Rojas', rol: 'soporte' }
+  { correo: 'soporte@hexacall.cl', clave: '654321', nombre: 'Alonso Ignacio Rojas', rol: 'soporte' }
 ];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -24,14 +27,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Carga inicial del estado desde localStorage
   useEffect(() => {
     try {
-      const sesionGuardada = localStorage.getItem('obraspro_sesion');
+      const sesionGuardada = localStorage.getItem(CLAVE_SESION);
       if (sesionGuardada) {
         setUsuario(JSON.parse(sesionGuardada) as SesionUsuario);
       }
     } catch (err: unknown) {
       console.error('Error al cargar sesión desde localStorage', err);
       try {
-        localStorage.removeItem('obraspro_sesion');
+        localStorage.removeItem(CLAVE_SESION);
       } catch {}
     }
   }, []);
@@ -43,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Buscar en usuarios guardados en localStorage o predefinidos
     let listaUsuarios = USUARIOS_PREDEFINIDOS;
     try {
-      const usuariosGuardadosRaw = localStorage.getItem('obraspro_usuarios_registrados');
+      const usuariosGuardadosRaw = localStorage.getItem(CLAVE_USUARIOS);
       if (usuariosGuardadosRaw) {
         const parsing: unknown = JSON.parse(usuariosGuardadosRaw);
         if (Array.isArray(parsing)) {
@@ -66,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         rol: usuarioEncontrado.rol
       };
 
-      localStorage.setItem('obraspro_sesion', JSON.stringify(datosSesion));
+      localStorage.setItem(CLAVE_SESION, JSON.stringify(datosSesion));
       setUsuario(datosSesion);
       return true;
     } else {
@@ -76,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('obraspro_sesion');
+    localStorage.removeItem(CLAVE_SESION);
     setUsuario(null);
     setErrorLogin(null);
   };
