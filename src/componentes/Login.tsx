@@ -32,22 +32,14 @@ const Icon = ({ children }: { children: React.ReactNode }) => (
  * - Todos los handlerscon tipo React.FormEvent o React.ChangeEvent
  */
 export default function Login() {
-  /**
-   * useState: Controla el formulario de login.
-   * Datos por defecto para facilitar pruebas: admin@admin.com / 123456
-   */
-  const [credenciales, setCredenciales] = useState({ correo: 'admin@admin.com', clave: '123456' });
-  
-  /**
-   * useState: Alterna visibilidad de contraseña (mostrar/ocultar)
-   */
+  // Estado controlado para el formulario de inicio de sesión
+  const [credencialesUsuario, setCredencialesUsuario] = useState({ correo: 'admin@admin.com', clave: '123456' });
+
+  // Controla si la contraseña se muestra como texto o como campo password
   const [mostrarContrasena, setMostrarContrasena] = useState(false);
-  
-  /**
-   * useState: Almacena errores de validación local (formato, longitud)
-   * Se prioriza sobre errorLogin del contexto
-   */
-  const [mensajeError, setMensajeError] = useState<string | null>(null);
+
+  // Errores de validación local (tienen prioridad sobre error del contexto)
+  const [errorValidacionLocal, setErrorValidacionLocal] = useState<string | null>(null);
   
   /**
    * useContext (hook custom useAuth):
@@ -65,7 +57,7 @@ export default function Login() {
   /**
    * errorTexto: Prioriza error local (validación) sobre error del contexto
    */
-  const errorTexto = mensajeError || errorLogin;
+  const errorTexto = errorValidacionLocal || errorLogin;
 
   /**
    * useEffect: Hook para efectos secundarios.
@@ -86,7 +78,7 @@ export default function Login() {
    * Tipado con React.ChangeEvent<HTMLInputElement>
    */
   const manejarCambioInput = ({ target: { name, value } }: React.ChangeEvent<HTMLInputElement>) =>
-    setCredenciales(prev => ({ ...prev, [name]: value }));
+    setCredencialesUsuario(prev => ({ ...prev, [name]: value }));
 
   /**
    * Valida y envía el formulario de login.
@@ -98,25 +90,21 @@ export default function Login() {
    */
   const manejarEnvio = (e: React.FormEvent) => {
     e.preventDefault();
-    const correoLimpio = credenciales.correo.trim();
+    const correoLimpio = credencialesUsuario.correo.trim();
 
-    // Validación 1: Formato de correo
+    // Validación 1: formato básico de correo
     if (!correoLimpio.includes('@') || !correoLimpio.includes('.'))
-      return setMensajeError('Formato de correo electrónico inválido.');
+      return setErrorValidacionLocal('Formato de correo electrónico inválido.');
 
-    // Validación 2: Longitud mínima de contraseña
-    if (credenciales.clave.length < 4)
-      return setMensajeError('La contraseña debe contener al menos 4 caracteres.');
+    // Validación 2: longitud mínima de contraseña
+    if (credencialesUsuario.clave.length < 4)
+      return setErrorValidacionLocal('La contraseña debe contener al menos 4 caracteres.');
 
-    /**
-     * Validación 3: Llama la función login del contexto.
-     * Si retorna true: credenciales correctas, navega al dashboard
-     * Si retorna false: credenciales incorrectas, muestra error desde el contexto
-     */
-    if (login(correoLimpio, credenciales.clave)) {
+    // Validación 3: delega comprobación de credenciales al contexto
+    if (login(correoLimpio, credencialesUsuario.clave)) {
       navigate('/dashboard');
     } else {
-      setMensajeError('Credenciales incorrectas. Verifique los datos.');
+      setErrorValidacionLocal('Credenciales incorrectas. Verifique los datos.');
     }
   };
 
@@ -149,7 +137,7 @@ export default function Login() {
                 type="email" 
                 required 
                 placeholder="admin@admin.com" 
-                value={credenciales.correo} 
+                value={credencialesUsuario.correo} 
                 onChange={manejarCambioInput} 
                 className="hexacall-input" 
               />
@@ -169,7 +157,7 @@ export default function Login() {
                 type={mostrarContrasena ? 'text' : 'password'}
                 required
                 placeholder="••••••••"
-                value={credenciales.clave}
+                value={credencialesUsuario.clave}
                 onChange={manejarCambioInput}
                 className="hexacall-input"
               />

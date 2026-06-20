@@ -2,8 +2,8 @@ import React, { useState, FormEvent } from 'react';
 import { Obra, Reporte } from '../types';
 import './reportes.css';
 
-// Obtiene la fecha actual formateada (YYYY-MM-DD) para validar que no se ingresen reportes futuros
-const hoy = new Date().toISOString().slice(0, 10);
+// Fecha actual en formato YYYY-MM-DD (usada para validación de fecha)
+const fechaHoy = new Date().toISOString().slice(0, 10);
 
 type ReportesProps = { obras: Obra[]; reportes: Reporte[]; guardarReportes: (reportes: Reporte[]) => void };
 
@@ -25,66 +25,59 @@ type ReportesProps = { obras: Obra[]; reportes: Reporte[]; guardarReportes: (rep
  * Persistencia: Los datos se guardan en localStorage a través de guardarReportes()
  */
 export default function Reportes({ obras, reportes, guardarReportes }: ReportesProps) {
-  // useState: Gestiona qué reporte se está editando (null si es creación, id si es edición)
-  const [editandoId, setEditandoId] = useState<string | null>(null);
-  
-  // useState: Formulario controlado con obraId, fecha y descripción
-  const [form, setForm] = useState({ obraId: obras[0]?.id || '', fecha: hoy, descripcion: '' });
-  
-  // useState: Maneja mensajes de validación (error en rojo, éxito en verde)
-  const [mensaje, setMensaje] = useState<{ tipo: 'error' | 'success'; texto: string } | null>(null);
-  
-  // Variables computadas para renderizado condicional
+  // id del reporte que se está editando (null => creando uno nuevo)
+  const [reporteEditandoId, setReporteEditandoId] = useState<string | null>(null);
+
+  // Formulario controlado: obra asociada, fecha y descripción
+  const [formulario, setFormulario] = useState({ obraId: obras[0]?.id || '', fecha: fechaHoy, descripcion: '' });
+
+  // Mensajes de UI para mostrar errores o notificaciones de éxito
+  const [alerta, setAlerta] = useState<{ tipo: 'error' | 'success'; texto: string } | null>(null);
+
+  // Variables derivadas para la UI
   const obrasDisponibles = obras.length > 0;
-  const esEdicion = Boolean(editandoId);
+  const estaEnEdicion = Boolean(reporteEditandoId);
 
   // Ordena reportes por fecha descendente (más recientes primero)
-  const ordenar = (items: Reporte[]) => [...items].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+  const ordenarPorFechaDescendente = (items: Reporte[]) => [...items].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
 
   // Función auxiliar: limpia el formulario y el estado de edición
-  const limpiar = () => {
-    setForm({ obraId: obras[0]?.id || '', fecha: hoy, descripcion: '' });
-    setEditandoId(null);
-    setMensaje(null);
+  const limpiarFormulario = () => {
+    setFormulario({ obraId: obras[0]?.id || '', fecha: fechaHoy, descripcion: '' });  
+    setReporteEditandoId(null);
+    setAlerta(null);
   };
 
   // Maneja la sumisión del formulario: valida y guarda o actualiza el reporte
   const manejarEnvio = (e: FormEvent) => {
     e.preventDefault();
-    setMensaje(null);
+    setAlerta(null);
 
-    // Validación 1: Debe haber al menos una obra para asociar el reporte
-    if (!obrasDisponibles) return setMensaje({ tipo: 'error', texto: 'No hay obras disponibles para asociar el informe.' });
-    
-    // Validación 2: Descripción es obligatoria y no puede ser solo espacios
-    if (!form.descripcion.trim()) return setMensaje({ tipo: 'error', texto: 'Descripción requerida para el informe.' });
-    
-    // Validación 3: La fecha no puede ser en el futuro (restricción de negocio)
-    if (form.fecha > hoy) return setMensaje({ tipo: 'error', texto: 'La fecha no puede ser mayor que la de hoy.' });
+    if (!obrasDisponibles) return setAlerta({ tipo: 'error', texto: 'No hay obras disponibles para asociar el informe.' });
 
-    // Crea el objeto Reporte con tipos validados (TypeScript)
-    const datos: Reporte = { 
-      id: editandoId || `reporte-${Date.now()}`, 
-      obraId: form.obraId, 
-      fecha: form.fecha, 
-      descripcion: form.descripcion.trim() 
+    if (!formulario.descripcion.trim()) return setAlerta({ tipo: 'error', texto: 'Descripción requerida para el informe.' });
+
+    if (formulario.fecha > fechaHoy) return setAlerta({ tipo: 'error', texto: 'La fecha no puede ser mayor que la de hoy.' });
+
+    const datosReporte: Reporte = {
+      id: reporteEditandoId || `reporte-${Date.now()}`,
+      obraId: formulario.obraId,
+      fecha: formulario.fecha,
+      descripcion: formulario.descripcion.trim(),
     };
-    
-    // Lógica de CRUD: si esEdicion, actualiza el reporte; si no, lo agrega al inicio
-    const actualizados = editandoId 
-      ? reportes.map(r => r.id === editandoId ? datos : r) 
-      : [datos, ...reportes];
+
+    const actualizados = reporteEditandoId
+      ? reportes.map(r => r.id === reporteEditandoId ? datosReporte : r)
+      : [datosReporte, ...reportes];
 
     try {
-      // Persiste los datos en localStorage a través de la función prop
       guardarReportes(actualizados);
-      setMensaje({ tipo: 'success', texto: esEdicion ? 'Informe actualizado correctamente.' : 'Informe creado correctamente.' });
-      limpiar();
-      // Auto-oculta el mensaje después de 3 segundos
-      window.setTimeout(() => setMensaje(null), 3000);
+      setAlerta({ tipo: 'success', texto: estaEnEdicion ? 'Informe actualizado correctamente.' : 'Informe creado correctamente.' });
+      limpiarFormulario();
+      window.setTimeout(() => setAlerta(null), 3000);
     } catch (err) {
       console.error(err);
-      setMensaje({ tipo: 'error', texto: 'Ocurrió un error inesperado al guardar el informe.' });
+      setAlerta({ tipo: 'error', texto: 'Ocurrió un error inesperado al guardar el informe.' });
     }
   };
 
@@ -93,20 +86,20 @@ export default function Reportes({ obras, reportes, guardarReportes }: ReportesP
     if (!confirm('¿Eliminar este informe?')) return;
     try {
       guardarReportes(reportes.filter(r => r.id !== id));
-      setMensaje({ tipo: 'success', texto: 'Informe eliminado correctamente.' });
-      if (editandoId === id) limpiar(); // Si estaba editando, limpia el formulario
-      window.setTimeout(() => setMensaje(null), 2500);
+      setAlerta({ tipo: 'success', texto: 'Informe eliminado correctamente.' });
+      if (reporteEditandoId === id) limpiarFormulario();
+      window.setTimeout(() => setAlerta(null), 2500);
     } catch (err) {
       console.error(err);
-      setMensaje({ tipo: 'error', texto: 'Ocurrió un error inesperado al eliminar el informe.' });
+      setAlerta({ tipo: 'error', texto: 'Ocurrió un error inesperado al eliminar el informe.' });
     }
   };
 
   // Inicia modo edición: carga el reporte en el formulario y scroll al top
   const iniciarEdicion = (reporte: Reporte) => {
-    setEditandoId(reporte.id);
-    setForm({ obraId: reporte.obraId, fecha: reporte.fecha, descripcion: reporte.descripcion });
-    setMensaje(null);
+    setReporteEditandoId(reporte.id);
+    setFormulario({ obraId: reporte.obraId, fecha: reporte.fecha, descripcion: reporte.descripcion });
+    setAlerta(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -123,29 +116,28 @@ export default function Reportes({ obras, reportes, guardarReportes }: ReportesP
         {/* PANEL IZQUIERDO: Formulario de creación/edición de reportes */}
         <div className="reportes-creacion">
           <div className="reportes-creacion-top">
-            <h2>{esEdicion ? 'Editar informe' : 'Nuevo informe'}</h2>
+            <h2>{estaEnEdicion ? 'Editar informe' : 'Nuevo informe'}</h2>
             {/* Alerta si no hay obras: el usuario debe crear obras primero */}
             {!obrasDisponibles && <div className="alert-box">No hay obras creadas. Crea una obra primero para generar un informe.</div>}
-            {/* Renderiza mensajes de error (rojo) o éxito (verde) desde useState */}
-            {mensaje && <div className={`alert-box ${mensaje.tipo === 'success' ? 'alert-success' : ''}`}>{mensaje.texto}</div>}
+            {alerta && <div className={`alert-box ${alerta.tipo === 'success' ? 'alert-success' : ''}`}>{alerta.texto}</div>}
           </div>
 
           {/* Formulario controlado con useState: todos los campos actualizan el estado en tiempo real */}
           <form onSubmit={manejarEnvio} className="reportes-form">
             <label htmlFor="reporte-obra">Obra</label>
-            <select id="reporte-obra" value={form.obraId} onChange={e => setForm(prev => ({ ...prev, obraId: e.target.value }))} disabled={!obrasDisponibles}>
+            <select id="reporte-obra" value={formulario.obraId} onChange={e => setFormulario(prev => ({ ...prev, obraId: e.target.value }))} disabled={!obrasDisponibles}>
               {obras.map(obra => (<option key={obra.id} value={obra.id}>{obra.nombre}</option>))}
             </select>
 
             <label htmlFor="reporte-fecha">Fecha</label>
-            <input id="reporte-fecha" type="date" value={form.fecha} max={hoy} onChange={e => setForm(prev => ({ ...prev, fecha: e.target.value }))} disabled={!obrasDisponibles} />
+            <input id="reporte-fecha" type="date" value={formulario.fecha} max={fechaHoy} onChange={e => setFormulario(prev => ({ ...prev, fecha: e.target.value }))} disabled={!obrasDisponibles} />
 
             <label htmlFor="reporte-descripcion">Descripción</label>
-            <textarea id="reporte-descripcion" rows={5} placeholder="Describe los avances, hallazgos o novedades del día..." value={form.descripcion} onChange={e => setForm(prev => ({ ...prev, descripcion: e.target.value }))} disabled={!obrasDisponibles} />
+            <textarea id="reporte-descripcion" rows={5} placeholder="Describe los avances, hallazgos o novedades del día..." value={formulario.descripcion} onChange={e => setFormulario(prev => ({ ...prev, descripcion: e.target.value }))} disabled={!obrasDisponibles} />
 
             <div className="reportes-form-actions">
-              <button type="submit" className="btn-crear-reporte" disabled={!obrasDisponibles}>{esEdicion ? 'Guardar cambios' : 'Crear informe'}</button>
-              {esEdicion && <button type="button" className="btn-cancelar-edicion" onClick={limpiar}>Cancelar edición</button>}
+              <button type="submit" className="btn-crear-reporte" disabled={!obrasDisponibles}>{estaEnEdicion ? 'Guardar cambios' : 'Crear informe'}</button>
+              {estaEnEdicion && <button type="button" className="btn-cancelar-edicion" onClick={limpiarFormulario}>Cancelar edición</button>}
             </div>
           </form>
         </div>
@@ -156,12 +148,12 @@ export default function Reportes({ obras, reportes, guardarReportes }: ReportesP
             <h2>Informes creados</h2>
             <span>{reportes.length} {reportes.length === 1 ? 'informe' : 'informes'}</span>
           </div>
-          {ordenar(reportes).length === 0 ? (
+          {ordenarPorFechaDescendente(reportes).length === 0 ? (
             <p className="reportes-vacio">No se han registrado informes aún.</p>
           ) : (
             <div className="reportes-bloques">
               {/* Mapea reportes ordenados por fecha (más recientes primero) */}
-              {ordenar(reportes).map(reporte => {
+              {ordenarPorFechaDescendente(reportes).map(reporte => {
                 // Busca la obra asociada al reporte (puede estar eliminada)
                 const obra = obras.find(o => o.id === reporte.obraId);
                 return (

@@ -22,7 +22,7 @@ const CLAVE_SESION = 'hexacall_sesion';
  * USUARIOS_PREDEFINIDOS: Lista de usuarios válidos para autenticación.
  * En una aplicación real, esto vendría de una API.
  */
-const USUARIOS_PREDEFINIDOS = [
+const USUARIOS_PREDETERMINADOS = [
   { correo: 'admin@admin.com', clave: '123456', nombre: 'Luis Alberto Rojas', rol: 'administrador' },
 ];
 
@@ -58,7 +58,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  * 2. Si hay error (JSON corrupto), limpia el localStorage y retorna null
  * 3. Esto garantiza que siempre retorna null o un objeto válido de sesión
  */
-const cargarSesion = () => {
+const cargarSesionDesdeStorage = () => {
   try {
     return JSON.parse(localStorage.getItem(CLAVE_SESION) ?? 'null');
   } catch {
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * Se inicializa con cargarSesion() para verificar si hay sesión previa en localStorage.
    * Esto permite que el usuario permanezca logueado al recargar la página.
    */
-  const [usuario, setUsuario] = useState<SesionUsuario | null>(cargarSesion);
+  const [usuario, setUsuario] = useState<SesionUsuario | null>(cargarSesionDesdeStorage);
   
   /**
    * useState: Mensaje de error de autenticación.
@@ -110,29 +110,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * 4. Si no encuentra: setea error y retorna false
    * 5. Si encuentra: guarda en localStorage, actualiza estado, retorna true
    */
-  const login = (correoInput: string, claveInput: string): boolean => {
+  const login = (correoIngresado: string, claveIngresada: string): boolean => {
     setErrorLogin(null);
-    const correoNorm = correoInput.trim().toLowerCase();
-    
-    // Busca un usuario que coincida con correo Y contraseña
-    const usuarioEncontrado = USUARIOS_PREDEFINIDOS.find(
-      u => u.correo.toLowerCase() === correoNorm && u.clave === claveInput
+    const correoNorm = correoIngresado.trim().toLowerCase();
+
+    // Busca un usuario predefinido que coincida con correo y contraseña
+    const usuarioValido = USUARIOS_PREDETERMINADOS.find(
+      usuarioDef => usuarioDef.correo.toLowerCase() === correoNorm && usuarioDef.clave === claveIngresada
     );
-    
-    // Si no encuentra credenciales válidas
-    if (!usuarioEncontrado) 
-      return setErrorLogin('Credenciales inválidas. Correo o contraseña incorrectos.'), false;
-    
-    // Crea objeto de sesión (sin exponer contraseña)
-    const datosSesion = { 
-      correo: usuarioEncontrado.correo, 
-      nombre: usuarioEncontrado.nombre, 
-      rol: usuarioEncontrado.rol 
+
+    if (!usuarioValido) {
+      setErrorLogin('Credenciales inválidas. Correo o contraseña incorrectos.');
+      return false;
+    }
+
+    // Construye el objeto de sesión sin incluir la contraseña
+    const datosSesionUsuario = {
+      correo: usuarioValido.correo,
+      nombre: usuarioValido.nombre,
+      rol: usuarioValido.rol,
     };
-    
-    // Persiste en localStorage y actualiza estado
-    localStorage.setItem(CLAVE_SESION, JSON.stringify(datosSesion));
-    setUsuario(datosSesion);  
+
+    // Persiste en localStorage y actualiza el estado de sesión
+    localStorage.setItem(CLAVE_SESION, JSON.stringify(datosSesionUsuario));
+    setUsuario(datosSesionUsuario);
     return true;
   };
 
@@ -146,11 +147,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * 
    * Esto cumple el criterio de rúbrica: "logout limpia contexto y localStorage"
    */
-  const logout = () => (
-    localStorage.removeItem(CLAVE_SESION), 
-    setUsuario(null), 
-    setErrorLogin(null)
-  );
+  const logout = () => {
+    localStorage.removeItem(CLAVE_SESION);
+    setUsuario(null);
+    setErrorLogin(null);
+  };
 
   /**
    * AuthContext.Provider: Expone el contexto a toda la app.

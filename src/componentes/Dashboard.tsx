@@ -7,8 +7,8 @@ import './dashboard.css';
  * Componente Icon: Renderiza SVGs reutilizables con tamaño dinámico.
  * Reduce duplicación de código SVG en toda la aplicación.
  */
-const Icon = ({ children, w = "16" }: { children: React.ReactNode; w?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width={w} height={w} aria-hidden>
+const Icon = ({ children, width = "16" }: { children: React.ReactNode; width?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width={width} height={width} aria-hidden>
     {children}
   </svg>
 );
@@ -30,31 +30,57 @@ const Icon = ({ children, w = "16" }: { children: React.ReactNode; w?: string })
  * 5. Tabla con todas las obras para revisión rápida
  */
 export default function Dashboard({ obras, personal, reportes, alNavegarPestaña, logout, usuario }: DashboardProps) {
-  // Calcula el total de obras: usado para gráficos, totales y validación de datos vacíos
+  // Total de proyectos cargados (usado para porcentajes y tablas)
   const totalDeObras = obras.length;
-  
-  // Suma todos los presupuestos de las obras: indicador de inversión acumulada
-  const presupuestoTotal = obras.reduce((s, o) => s + (o.presupuesto || 0), 0);
-  
-  // Obtiene los 3 reportes más recientes ordenados por fecha descendente
-  // Se usa para mostrar historial de avances en el dashboard
-  const reportesRecientes = reportes.length ? [...reportes].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()).slice(0, 3) : [];
-  
-  // Resumen de estados: agrupa obras por estado (en curso, pausada, finalizada)
-  // Usado para calcular porcentajes en el gráfico de distribución
-  const resumenEstados = ['en curso', 'pausada', 'finalizada'].map((etiqueta, i) => ({
-    etiqueta,
-    color: ['red', 'yellow', 'green'][i],
-    cantidad: obras.filter(o => o.estado === etiqueta).length
-  }));
+
+  // Presupuesto total acumulado de todas las obra  s (0 si no hay presupuesto definido)
+  const presupuestoTotal = obras.reduce((sumaPresupuestos, obraItem) => sumaPresupuestos + (obraItem.presupuesto || 0), 0);
+
+  // Últimos 3 reportes ordenados por fecha (descendente)
+  const reportesRecientes = reportes.length
+    ? [...reportes].sort((reporteA, reporteB) => new Date(reporteB.fecha).getTime() - new Date(reporteA.fecha).getTime()).slice(0, 3)
+    : [];
+
+  // Construye un resumen por estado con etiqueta, color y cantidad de obras
+  const estadosReferencia = ['en curso', 'pausada', 'finalizada'];
+  const coloresPorEstado = ['red', 'yellow', 'green'];
+  const resumenEstados = estadosReferencia.map((estadoEtiqueta, indice) => {
+    const colorAsignado = coloresPorEstado[indice];
+    const cantidadPorEstado = obras.filter(obraItem => obraItem.estado === estadoEtiqueta).length;
+    return { etiqueta: estadoEtiqueta, color: colorAsignado, cantidad: cantidadPorEstado };
+  });
 
   // Configuración de las 4 tarjetas principales KPI
   // Cada tarjeta es navegable (excepto presupuesto) y lleva a su módulo correspondiente
   const tarjetasInfo = [
-    { id: 'obras', titulo: 'Obras Civiles', valor: totalDeObras, nota: 'Proyectos registrados', icono: <><rect x="2" y="10" width="20" height="12" rx="2" /><path d="m12 2 10 8H2Z" /></> },
-    { id: 'personal', titulo: 'Personal', valor: personal.length, nota: 'Operarios activos', icono: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></> },
-    { id: 'reportes', titulo: 'Bitácora Diario', valor: reportes.length, nota: 'Informes de avance', icono: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /><path d="M16 13H8" /><path d="M16 17H8" /><path d="M10 9H8" /></> },
-    { id: 'presupuesto', titulo: 'Presupuesto Ejecutado', valor: formatearMoneda(presupuestoTotal), nota: 'Inversión acumulada', icono: <><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></> }
+    {
+      id: 'obras',
+      titulo: 'Obras Civiles',
+      valor: totalDeObras,
+      nota: 'Proyectos registrados',
+      icono: <><rect x="2" y="10" width="20" height="12" rx="2" /><path d="m12 2 10 8H2Z" /></>
+    },
+    {
+      id: 'personal',
+      titulo: 'Personal',
+      valor: personal.length,
+      nota: 'Operarios activos',
+      icono: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>
+    },
+    {
+      id: 'reportes',
+      titulo: 'Bitácora Diario',
+      valor: reportes.length,
+      nota: 'Informes de avance',
+      icono: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /><path d="M16 13H8" /><path d="M16 17H8" /><path d="M10 9H8" /></>
+    },
+    {
+      id: 'presupuesto',
+      titulo: 'Presupuesto Ejecutado',
+      valor: formatearMoneda(presupuestoTotal),
+      nota: 'Inversión acumulada',
+      icono: <><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></>
+    }
   ];
 
   return (
@@ -82,20 +108,20 @@ export default function Dashboard({ obras, personal, reportes, alNavegarPestaña
       {/* 2. TARJETAS KPI: Renderiza 4 indicadores principales */}
       {/* Las tarjetas de obras, personal y reportes son navegables */}
       <section className="dashboard-cards">
-        {tarjetasInfo.map(tarjeta => (
+        {tarjetasInfo.map(tarjetaInfo => (
           <article 
-            key={tarjeta.id} 
-            className={`dashboard-card ${tarjeta.id === 'obras' ? 'dashboard-card-primary' : ''}`}
-            onClick={() => tarjeta.id !== 'presupuesto' && alNavegarPestaña(tarjeta.id)}
-            role={tarjeta.id !== 'presupuesto' ? "button" : undefined}
+            key={tarjetaInfo.id} 
+            className={`dashboard-card ${tarjetaInfo.id === 'obras' ? 'dashboard-card-primary' : ''}`}
+            onClick={() => tarjetaInfo.id !== 'presupuesto' && alNavegarPestaña(tarjetaInfo.id)}
+            role={tarjetaInfo.id !== 'presupuesto' ? "button" : undefined}
           >
             <div className="card-top-row">
-              <h2 className="card-title">{tarjeta.titulo}</h2>
-              <span className="dashboard-card-icon"><Icon>{tarjeta.icono}</Icon></span>
+              <h2 className="card-title">{tarjetaInfo.titulo}</h2>
+              <span className="dashboard-card-icon"><Icon>{tarjetaInfo.icono}</Icon></span>
             </div>
             <div>
-              <p className={`card-value ${tarjeta.id === 'presupuesto' ? 'card-value-large' : ''}`}>{tarjeta.valor}</p>
-              <p className="card-note">{tarjeta.nota}</p>
+              <p className={`card-value ${tarjetaInfo.id === 'presupuesto' ? 'card-value-large' : ''}`}>{tarjetaInfo.valor}</p>
+              <p className="card-note">{tarjetaInfo.nota}</p>
             </div>
           </article>
         ))}
@@ -112,10 +138,11 @@ export default function Dashboard({ obras, personal, reportes, alNavegarPestaña
             <>
               {/* Barra de distribución: cada segmento representa el porcentaje de obras por estado */}
               <div className="distribution-bar">
-                {resumenEstados.map(estado => {
-                  const porcentaje = Math.round((estado.cantidad / totalDeObras) * 100) || 5;
+                {resumenEstados.map(estadoResumen => {
+                  // Calcula porcentaje para la barra; si es 0 devuelve 5% para visibilidad mínima
+                  const porcentaje = Math.round((estadoResumen.cantidad / totalDeObras) * 100) || 5;
                   return (
-                    <div key={estado.color} className={`bar-segment bar-segment--${estado.color}`} style={{ width: `${porcentaje}%` }} title={`${estado.etiqueta}: ${estado.cantidad} (${porcentaje}%)`}>
+                    <div key={estadoResumen.color} className={`bar-segment bar-segment--${estadoResumen.color}`} style={{ width: `${porcentaje}%` }} title={`${estadoResumen.etiqueta}: ${estadoResumen.cantidad} (${porcentaje}%)`}>
                       {porcentaje > 15 && `${porcentaje}%`}
                     </div>
                   );
@@ -123,10 +150,10 @@ export default function Dashboard({ obras, personal, reportes, alNavegarPestaña
               </div>
               {/* Leyenda de conteos por estado */}
               <div className="distribution-legend">
-                {resumenEstados.map(estado => (
-                  <div key={estado.color} className={`legend-card legend-card--${estado.color}`}>
-                    <div className="legend-value">{estado.cantidad}</div>
-                    <div style={{ textTransform: 'capitalize' }}>{estado.etiqueta}</div>
+                {resumenEstados.map(estadoResumen => (
+                  <div key={estadoResumen.color} className={`legend-card legend-card--${estadoResumen.color}`}>
+                    <div className="legend-value">{estadoResumen.cantidad}</div>
+                    <div style={{ textTransform: 'capitalize' }}>{estadoResumen.etiqueta}</div>
                   </div>
                 ))}
               </div>
@@ -147,9 +174,9 @@ export default function Dashboard({ obras, personal, reportes, alNavegarPestaña
               {reportesRecientes.map(reporte => (
                 <div key={reporte.id} className="report-item" onClick={() => alNavegarPestaña('obras')}>
                   <div className="report-item-header">
-                    <strong>{obras.find(o => o.id === reporte.obraId)?.nombre || 'Obra Desvinculada'}</strong>
+                    <strong>{obras.find(obraItem => obraItem.id === reporte.obraId)?.nombre || 'Obra Desvinculada'}</strong>
                     <span className="report-date">
-                      <Icon w="14">
+                      <Icon width="14">
                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                         <line x1="16" y1="2" x2="16" y2="6" />
                         <line x1="8" y1="2" x2="8" y2="6" />
@@ -181,13 +208,13 @@ export default function Dashboard({ obras, personal, reportes, alNavegarPestaña
             <table>
               <thead><tr><th>Proyecto</th><th>Estado</th><th>Ubicación</th><th>Presupuesto</th><th>Acciones</th></tr></thead>
               <tbody>
-                {obras.map(obra => (
-                  <tr key={obra.id}>
-                    <td><strong>{obra.nombre}</strong></td>
+                {obras.map(obraItem => (
+                  <tr key={obraItem.id}>
+                    <td><strong>{obraItem.nombre}</strong></td>
                     {/* Estado se formatea removiendo espacios para generar clase CSS correcta (ej: "en curso" → "encurso") */}
-                    <td><span className={`badge badge--${obra.estado.replace(' ', '')}`}>{obra.estado}</span></td>
-                    <td>{obra.ubicacion || 'No informada'}</td>
-                    <td>{obra.presupuesto ? formatearMoneda(obra.presupuesto) : 'S/P'}</td>
+                    <td><span className={`badge badge--${obraItem.estado.replace(/\s+/g, '')}`}>{obraItem.estado}</span></td>
+                    <td>{obraItem.ubicacion || 'No informada'}</td>
+                    <td>{obraItem.presupuesto ? formatearMoneda(obraItem.presupuesto) : 'S/P'}</td>
                     <td><button type="button" className="small-button" onClick={() => alNavegarPestaña('obras')}>Ver obra</button></td>
                   </tr>
                 ))}
