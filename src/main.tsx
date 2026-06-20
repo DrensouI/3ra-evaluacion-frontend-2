@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './componentes/Login';
 import Dashboard from './componentes/Dashboard';
 import ObrasYProyectos from './componentes/ObrasYProyectos';
+import Reportes from './componentes/Reportes';
 import { Almacenamiento } from './utils';
 import SideBar from './componentes/sidebar';
 
@@ -22,7 +23,11 @@ function DashboardWrapper() {
   const obras = Almacenamiento.obtenerObras();
   const personal = Almacenamiento.obtenerPersonal();
   const reportes = Almacenamiento.obtenerReportes();
-  const alNavegarPestaña = (pestaña: string) => pestaña === 'obras' ? navigate('/obras') : console.log('Navegar a pestaña', pestaña);
+  const alNavegarPestaña = (pestaña: string) => {
+    if (pestaña === 'obras') return navigate('/obras');
+    if (pestaña === 'reportes') return navigate('/reportes');
+    return console.log('Navegar a pestaña', pestaña);
+  };
   const cerrarSesion = () => {
     logout();
     navigate('/');
@@ -106,9 +111,8 @@ root.render(
               <ProtectedRoute>
                 <div style={{ display: 'flex' }}>
                   <SideBar />
-                  <div style={{ flex: 1, padding: '2rem', background: '#f8f9fa', minHeight: '100vh' }}>
-                    <h1>Sección de Reportes</h1>
-                    <p>Esta sección está en desarrollo.</p>
+                  <div style={{ flex: 1 }}>
+                    <Reportes />
                   </div>
                 </div>
               </ProtectedRoute>

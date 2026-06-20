@@ -4,6 +4,7 @@ import { SesionUsuario } from '../types';
 const CLAVE_SESION = 'hexacall_sesion';
 const USUARIOS_PREDEFINIDOS = [
   { correo: 'admin@admin.com', clave: '123456', nombre: 'Luis Alberto Rojas', rol: 'administrador' },
+
 ];
 
 interface AuthContextType {
