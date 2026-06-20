@@ -1,47 +1,61 @@
 import React, { useState, useRef } from 'react';
 import { Obra, EstadoObra } from '../types';
-import { Almacenamiento, formatearMoneda } from '../utils';
+import { formatearMoneda } from '../utils';
 import './obras-proyectos.css';
 
-export default function ObrasYProyectos() {
-  const [obras, setObras] = useState<Obra[]>(Almacenamiento.obtenerObras());
+type ObrasYProyectosProps = {
+  obras: Obra[];
+  guardarObras: (obras: Obra[]) => void;
+};
+
+export default function ObrasYProyectos({ obras, guardarObras }: ObrasYProyectosProps) {
   const [mostrar, setMostrar] = useState(false);
   const [editando, setEditando] = useState<Obra | null>(null);
   const [form, setForm] = useState({ nombre: '', ubicacion: '', estado: 'en curso' as EstadoObra, presupuesto: '' });
+  const [mensajeError, setMensajeError] = useState<string | null>(null);
   const nombreInputRef = useRef<HTMLInputElement>(null);
 
   const guardar = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.nombre.trim()) return alert('Nombre requerido');
+    setMensajeError(null);
+
+    if (!form.nombre.trim())
+      return setMensajeError('El nombre de la obra es obligatorio.');
+    
+    if (!form.ubicacion.trim())
+      return setMensajeError('La ubicación de la obra es obligatoria.');
     
     const presupuesto = form.presupuesto ? parseFloat(form.presupuesto) : 0;
-    if (presupuesto < 0) return alert('Presupuesto no puede ser negativo');
+    if (presupuesto < 0)
+      return setMensajeError('El presupuesto no puede ser negativo.');
     
     const actualizado = editando
       ? obras.map(o => o.id === editando.id ? { ...o, ...form, presupuesto } : o)
       : [...obras, { id: `obra-${Date.now()}`, ...form, presupuesto }];
     
-    Almacenamiento.guardarObras(actualizado);
-    setObras(actualizado);
+    guardarObras(actualizado);
     setForm({ nombre: '', ubicacion: '', estado: 'en curso', presupuesto: '' });
+    setMensajeError(null);
     setMostrar(false);
     setEditando(null);
   };
 
-  const cerrarModal = () => { setMostrar(false); setEditando(null); };
+  const cerrarModal = () => { 
+    setMostrar(false); 
+    setEditando(null); 
+    setMensajeError(null);
+  };
 
   const eliminar = (id: string) => {
     if (confirm('¿Eliminar?')) {
       const actualizado = obras.filter(o => o.id !== id);
-      Almacenamiento.guardarObras(actualizado);
-      setObras(actualizado);
+      guardarObras(actualizado);
     }
   };
 
   const cambiarEstado = (id: string, estado: EstadoObra) => {
     const actualizado = obras.map(o => o.id === id ? { ...o, estado } : o);
-    Almacenamiento.guardarObras(actualizado);
-    setObras(actualizado);
+    guardarObras(actualizado);
   };
 
   const abrirEditar = (o: Obra) => {
@@ -152,10 +166,12 @@ export default function ObrasYProyectos() {
                 onChange={e => setForm({...form, nombre: e.target.value})}
               />
 
-              <label htmlFor="obra-ubicacion">Ubicación</label>
+              <label htmlFor="obra-ubicacion">Ubicación *</label>
               <input
                 id="obra-ubicacion"
                 type="text"
+                required
+                aria-required="true"
                 placeholder="Ubicación"
                 value={form.ubicacion}
                 onChange={e => setForm({...form, ubicacion: e.target.value})}
@@ -181,6 +197,9 @@ export default function ObrasYProyectos() {
                 value={form.presupuesto}
                 onChange={e => setForm({...form, presupuesto: e.target.value})}
               />
+
+              {mensajeError && <div className="alert-box">{mensajeError}</div>}
+
               <div className="form-btns">
                 <button type="button" onClick={cerrarModal} aria-label="Cancelar">Cancelar</button>
                 <button type="submit" aria-label={editando ? 'Actualizar obra' : 'Guardar obra'}>{editando ? 'Actualizar' : 'Guardar'}</button>

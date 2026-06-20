@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -7,6 +7,7 @@ import Dashboard from './componentes/Dashboard';
 import ObrasYProyectos from './componentes/ObrasYProyectos';
 import Reportes from './componentes/Reportes';
 import { Almacenamiento } from './utils';
+import { Obra, Personal, Reporte } from './types';
 import SideBar from './componentes/sidebar';
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
@@ -17,53 +18,132 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
   return children;
 }
 
-function DashboardWrapper() {
-  const navigate = useNavigate();
-  const { logout, usuario } = useAuth();
-  const obras = Almacenamiento.obtenerObras();
-  const personal = Almacenamiento.obtenerPersonal();
-  const reportes = Almacenamiento.obtenerReportes();
-  const alNavegarPestaña = (pestaña: string) => {
-    if (pestaña === 'obras') return navigate('/obras');
-    if (pestaña === 'reportes') return navigate('/reportes');
-    return console.log('Navegar a pestaña', pestaña);
+function App() {
+  const [obras, setObras] = useState<Obra[]>(Almacenamiento.obtenerObras());
+  const [personal] = useState<Personal[]>([]);
+  const [reportes, setReportes] = useState<Reporte[]>(Almacenamiento.obtenerReportes());
+
+  const guardarObras = (items: Obra[]) => {
+    Almacenamiento.guardarObras(items);
+    setObras(items);
   };
-  const cerrarSesion = () => {
-    logout();
-    navigate('/');
+
+  const guardarReportes = (items: Reporte[]) => {
+    Almacenamiento.guardarReportes(items);
+    setReportes(items);
+  };
+
+  const DashboardWrapper = () => {
+    const navigate = useNavigate();
+    const { logout, usuario } = useAuth();
+
+    const alNavegarPestaña = (pestaña: string) => {
+      if (pestaña === 'obras') return navigate('/obras');
+      if (pestaña === 'reportes') return navigate('/reportes');
+      return console.log('Navegar a pestaña', pestaña);
+    };
+
+    const cerrarSesion = () => {
+      logout();
+      navigate('/');
+    };
+
+    return (
+      <div style={{ display: 'flex' }}>
+        <SideBar />
+        <div style={{ flex: 1 }}>
+          <Dashboard
+            obras={obras}
+            personal={personal}
+            reportes={reportes}
+            alNavegarPestaña={alNavegarPestaña}
+            logout={cerrarSesion}
+            usuario={usuario}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const ObrasWrapper = () => {
+    const { logout } = useAuth();
+    const cerrarSesion = () => {
+      logout();
+      window.location.href = '/';
+    };
+
+    return (
+      <div style={{ display: 'flex' }}>
+        <SideBar />
+        <div style={{ flex: 1 }}>
+          <ObrasYProyectos obras={obras} guardarObras={guardarObras} />
+        </div>
+      </div>
+    );
+  };
+
+  const ReportesWrapper = () => {
+    const { logout } = useAuth();
+    const cerrarSesion = () => {
+      logout();
+      window.location.href = '/';
+    };
+
+    return (
+      <div style={{ display: 'flex' }}>
+        <SideBar />
+        <div style={{ flex: 1 }}>
+          <Reportes obras={obras} reportes={reportes} guardarReportes={guardarReportes} />
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div style={{ display: 'flex' }}>
-      <SideBar />
-      <div style={{ flex: 1 }}>
-        <Dashboard
-          obras={obras}
-          personal={personal}
-          reportes={reportes}
-          alNavegarPestaña={alNavegarPestaña}
-          logout={cerrarSesion}
-          usuario={usuario}
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardWrapper />
+            </ProtectedRoute>
+          }
         />
-      </div>
-    </div>
-  );
-}
-
-function ObrasWrapper() {
-  const { logout } = useAuth();
-  const cerrarSesion = () => {
-    logout();
-    window.location.href = '/';
-  };
-
-  return (
-    <div style={{ display: 'flex' }}>
-      <SideBar />
-      <div style={{ flex: 1 }}>
-        <ObrasYProyectos />
-      </div>
-    </div>
+        <Route
+          path="/obras"
+          element={
+            <ProtectedRoute>
+              <ObrasWrapper />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/empleados"
+          element={
+            <ProtectedRoute>
+              <div style={{ display: 'flex' }}>
+                <SideBar />
+                <div style={{ flex: 1, padding: '2rem', background: '#f8f9fa', minHeight: '100vh' }}>
+                  <h1>Sección de Empleados</h1>
+                  <p>Esta sección está en desarrollo.</p>
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reportes"
+          element={
+            <ProtectedRoute>
+              <ReportesWrapper />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
@@ -72,55 +152,7 @@ const root = createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <React.StrictMode>
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardWrapper />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/obras"
-            element={
-              <ProtectedRoute>
-                <ObrasWrapper />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/empleados"
-            element={
-              <ProtectedRoute>
-                <div style={{ display: 'flex' }}>
-                  <SideBar />
-                  <div style={{ flex: 1, padding: '2rem', background: '#f8f9fa', minHeight: '100vh' }}>
-                    <h1>Sección de Empleados</h1>
-                    <p>Esta sección está en desarrollo.</p>
-                  </div>
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/reportes"
-            element={
-              <ProtectedRoute>
-                <div style={{ display: 'flex' }}>
-                  <SideBar />
-                  <div style={{ flex: 1 }}>
-                    <Reportes />
-                  </div>
-                </div>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+      <App />
     </AuthProvider>
   </React.StrictMode>
 );

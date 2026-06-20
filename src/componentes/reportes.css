@@ -51,6 +51,12 @@
   margin-bottom: 12px;
 }
 
+.alert-success {
+  color: #065f46 !important;
+  background: #ecfdf5 !important;
+  border: 1px solid #bbf7d0 !important;
+}
+
 .reportes-creacion,
 .reportes-listado {
   background: var(--bg-panel);

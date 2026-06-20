@@ -94,6 +94,16 @@ form input:focus-visible, form select:focus-visible { border-color: var(--b); ba
 .form-btns button:last-child { background: var(--g); color: white; }
 .form-btns button:last-child:hover { background: #229954; }
 
+.alert-box {
+  color: #b91c1c;
+  background: #fff1f2;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #fecaca;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
 @media (max-width: 768px) {
   .obras-container { padding: 1rem; }
   .obras-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
