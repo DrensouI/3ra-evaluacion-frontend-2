@@ -7,10 +7,6 @@ const CLAVE_SESION = 'hexacall_sesion';
 
 export const Almacenamiento = {
   inicializar() {
-    // Forzamos inicio vacío de personal para evitar cargas de datos heredados.
-    if (localStorage.getItem(CLAVE_PERSONAL)) {
-      localStorage.removeItem(CLAVE_PERSONAL);
-    }
   },
   obtenerObras(): Obra[] {
     this.inicializar();
@@ -23,10 +19,18 @@ export const Almacenamiento = {
   guardarObras(obras: Obra[]) {
     localStorage.setItem(CLAVE_OBRAS, JSON.stringify(obras));
   },
-  obtenerPersonal(): Personal[] {
+obtenerPersonal(): Personal[] {
     this.inicializar();
     try {
-      return JSON.parse(localStorage.getItem(CLAVE_PERSONAL) || '[]');
+      // 1. Si ya se habian guardado datos en la tabla actica del localStorage se muestran
+      const datosActivos = localStorage.getItem(CLAVE_PERSONAL);
+      if (datosActivos) {
+        return JSON.parse(datosActivos);
+      }
+      
+      // 2. En el caso que este vacia, se rescata los datos de los 5 trabajadores predeterminados hacia la tabla activa que se utilizara
+      const datosPorDefecto = localStorage.getItem('obraspro_personal') || '[]';
+      return JSON.parse(datosPorDefecto);
     } catch {
       return [];
     }

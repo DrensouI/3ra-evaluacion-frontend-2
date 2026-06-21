@@ -9,6 +9,8 @@ import Reportes from './componentes/Reportes';
 import { Almacenamiento } from './utils';
 import { Obra, Personal, Reporte } from './types';
 import SideBar from './componentes/sidebar';
+import Empleados from './componentes/Personal';
+
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { estaAutenticado } = useAuth();
@@ -20,12 +22,17 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
 
 function App() {
   const [obras, setObras] = useState<Obra[]>(Almacenamiento.obtenerObras());
-  const [personal] = useState<Personal[]>([]);
+  const [personal, setPersonal] = useState<Personal[]>(Almacenamiento.obtenerPersonal());
   const [reportes, setReportes] = useState<Reporte[]>(Almacenamiento.obtenerReportes());
 
   const guardarObras = (items: Obra[]) => {
     Almacenamiento.guardarObras(items);
     setObras(items);
+  };
+
+  const guardarPersonal = (items: Personal[]) => {
+    Almacenamiento.guardarPersonal(items);
+    setPersonal(items);
   };
 
   const guardarReportes = (items: Reporte[]) => {
@@ -120,19 +127,22 @@ function App() {
           }
         />
         <Route
-          path="/empleados"
-          element={
-            <ProtectedRoute>
-              <div style={{ display: 'flex' }}>
-                <SideBar />
-                <div style={{ flex: 1, padding: '2rem', background: '#f8f9fa', minHeight: '100vh' }}>
-                  <h1>Sección de Empleados</h1>
-                  <p>Esta sección está en desarrollo.</p>
+            path="/empleados"
+            element={
+              <ProtectedRoute>
+                <div style={{ display: 'flex' }}>
+                  <SideBar />
+                  <div style={{ flex: 1 }}>
+                    <Empleados 
+                      obras={obras} 
+                      personal={personal} 
+                      guardarPersonal={guardarPersonal} 
+                    />
+                  </div>
                 </div>
-              </div>
-            </ProtectedRoute>
-          }
-        />
+              </ProtectedRoute>
+            }
+          />
         <Route
           path="/reportes"
           element={
