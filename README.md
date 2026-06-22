@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Descripción
+Proyecto frontend para la 3ra evaluación: una pequeña herramienta de gestión de obras, personal y reportes con autenticación local y persistencia en el navegador.
+Problema a resolver
+La empresa no cuenta con un sistema para digitalizar y organizar expedientes de obras y reportes diarios; la solución propone un portal con login, CRUD de obras y gestión de reportes y personal.
 
-## Getting Started
+Cómo ejecutar localmente
+Requisitos: Node.js, npm install y npm run dev
+Abrir cmd
+Una vez adentro
+ir al directorio de la carpeta y ejecutar cd con la ubicacion de donde esta la carpeta con el codigp
 
-First, run the development server:
+Instalar dependencias:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+npm install y npm run dev
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Abrir en el navegador: http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Credenciales de prueba
+Usuario por defecto para prueba:
 
-## Learn More
+- Correo: `admin@admin.com`
+- Contraseña: `123456`
 
-To learn more about Next.js, take a look at the following resources:
+Estructura y archivos relevantes
+`src/context/AuthContext.tsx`: manejo de sesión, `login`/`logout` y persistencia en `localStorage`.
+`src/componentes/Login.tsx`: formulario de inicio de sesión y validaciones locales. 
+`src/componentes/Dashboard.tsx`: vista principal con KPIs y distribución de estados.
+`src/componentes/ObrasYProyectos.tsx`: CRUD de obras (crear, editar, eliminar, buscar).
+`src/componentes/Personal.tsx`: (gestión de empleados) — lista, filtros y edición.
+`src/componentes/Reportes.tsx`: registro y listado de reportes vinculados a obras.
+`public/`: assets y recursos estáticos.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Módulos implementados
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Login con sesión y persistencia en `localStorage` (`CLAVE_SESION: hexacall_sesion`).
+Rutas protegidas / redirección al dashboard si existe sesión activa.
+CRUD de obras/proyectos con campos `nombre`, `ubicación`, `presupuesto` y `estado`.
+Detalle de obra y edición inline desde el listado.
+Gestión básica de personal (crear/editar/eliminar y filtros por cargo/obra).
+Módulo de reportes: crear registros diarios vinculados a una obra, editar y eliminar.
+Sidebar de navegación y cierre de sesión (limpia la sesión y redirige al login).
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
