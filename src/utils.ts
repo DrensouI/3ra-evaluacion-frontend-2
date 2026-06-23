@@ -22,13 +22,13 @@ export const Almacenamiento = {
 obtenerPersonal(): Personal[] {
     this.inicializar();
     try {
-      // 1. Si ya se habian guardado datos en la tabla actica del localStorage se muestran
+      //  Si ya se habian guardado datos en la tabla actica del localStorage se muestran
       const datosActivos = localStorage.getItem(CLAVE_PERSONAL);
       if (datosActivos) {
         return JSON.parse(datosActivos);
       }
       
-      // 2. En el caso que este vacia, se rescata los datos de los 5 trabajadores predeterminados hacia la tabla activa que se utilizara
+      //  En el caso que este vacia, se rescata los datos de los 5 trabajadores predeterminados hacia la tabla activa que se utilizara
       const datosPorDefecto = localStorage.getItem('obraspro_personal') || '[]';
       return JSON.parse(datosPorDefecto);
     } catch {

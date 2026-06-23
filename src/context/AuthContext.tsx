@@ -5,7 +5,7 @@ const CLAVE_SESION = 'hexacall_sesion';
 
 const USUARIOS_PREDETERMINADOS = [
   { correo: 'admin@admin.com', clave: '123456', nombre: 'Luis Alberto Rojas', rol: 'administrador' },
-  { correo: 'admin@loco.com', clave: '123456', nombre: 'jorge', rol: 'loco' },
+  
 ];
 
 interface AuthContextType {

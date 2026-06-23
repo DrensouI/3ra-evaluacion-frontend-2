@@ -12,17 +12,17 @@ import SideBar from './componentes/sidebar';
 import Empleados from './componentes/Personal';
 
 
-// # PASO 1 / LÍNEA 8: Componente Guardián que intercepta los accesos no autorizados a la intranet (ProtectedRoute).
+// Componente Guardián que intercepta los accesos no autorizados a la intranet 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { estaAutenticado } = useAuth();
 
-  // # PASO 1.1 / LÍNEA 12: Si no hay sesión activa, bloquea y devuelve al usuario a la raíz (<Navigate />).
+  
   if (!estaAutenticado) return <Navigate to="/" replace />;
   return children;
 }
 
 function App() {
-  // # PASO 2: Estados de los listados generales (obras, personal, reportes) cargados desde localStorage.
+  // Estados de los listados generales (obras, personal, reportes) cargados desde localStorage
   const [obras, setObras] = useState<Obra[]>(Almacenamiento.obtenerObras());
   const [personal, setPersonal] = useState<Personal[]>(Almacenamiento.obtenerPersonal());
   const [reportes, setReportes] = useState<Reporte[]>(Almacenamiento.obtenerReportes());
@@ -42,7 +42,7 @@ function App() {
     setReportes(items);
   };
 
-  // # PASO 3: Wrappers y manejadores de navegación/cierre de sesión (DashboardWrapper, ObrasWrapper, etc.).
+  //  Wrappers y manejadores de navegación/cierre de sesión .
   const DashboardWrapper = () => {
     const navigate = useNavigate();
     const { logout, usuario } = useAuth();
@@ -114,7 +114,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
-        {/* # PASO 4 / LÍNEA 26: Árbol de rutas donde la Ruta Privada se protege encapsulándola dentro del guardián (Ruta /dashboard). */}
+        {/* Árbol de rutas donde la Ruta Privada se protege encapsulándola dentro del guardián  */}
         <Route
           path="/dashboard"
           element={
@@ -172,7 +172,6 @@ function App() {
 
 const root = createRoot(document.getElementById('root') as HTMLElement);
 
-// # PASO 5 / LÍNEA 44: Envolvemos toda la aplicación en el proveedor global de autenticación (<AuthProvider>).
 root.render(
   <React.StrictMode>
     <AuthProvider>

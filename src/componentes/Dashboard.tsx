@@ -3,40 +3,24 @@ import { DashboardProps } from '../types';
 import { formatearMoneda } from '../utils';
 import './dashboard.css';
 
-/**
- * Componente Icon: Renderiza SVGs reutilizables con tamaño dinámico.
- * Reduce duplicación de código SVG en toda la aplicación.
- */
+/*
+ * Componente Icon: Renderiza SVGs reutilizables con tamaño dinámico.*/
 const Icon = ({ children, width = "16" }: { children: React.ReactNode; width?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width={width} height={width} aria-hidden>
     {children}
   </svg>
 );
 
-/**
- * Dashboard: Componente principal que exhibe indicadores clave (KPI).
- * 
- * Props:
- * - obras, personal, reportes: Datos cargados desde localStorage (gestionados en main.tsx)
- * - alNavegarPestaña: Callback para navegar entre módulos (obras, reportes, etc.)
- * - logout: Función del contexto de autenticación para cerrar sesión
- * - usuario: Datos del usuario autenticado desde AuthContext
- * 
- * Flujo:
- * 1. Calcula métricas derivadas (totales, presupuesto acumulado, reportes recientes)
- * 2. Renderiza 4 tarjetas principales con indicadores
- * 3. Muestra gráfico de distribución de estados de obras
- * 4. Lista últimos 3 reportes cargados
- * 5. Tabla con todas las obras para revisión rápida
- */
+
+
 export default function Dashboard({ obras, personal, reportes, alNavegarPestaña, logout, usuario }: DashboardProps) {
   // Total de proyectos cargados (usado para porcentajes y tablas)
   const totalDeObras = obras.length;
 
-  // Presupuesto total acumulado de todas las obra  s (0 si no hay presupuesto definido)
+  // Presupuesto total acumulado de todas las obras
   const presupuestoTotal = obras.reduce((sumaPresupuestos, obraItem) => sumaPresupuestos + (obraItem.presupuesto || 0), 0);
 
-  // Últimos 3 reportes ordenados por fecha (descendente)
+  // Últimos 3 reportes ordenados por fecha 
   const reportesRecientes = reportes.length
     ? [...reportes].sort((reporteA, reporteB) => new Date(reporteB.fecha).getTime() - new Date(reporteA.fecha).getTime()).slice(0, 3)
     : [];
@@ -50,8 +34,8 @@ export default function Dashboard({ obras, personal, reportes, alNavegarPestaña
     return { etiqueta: estadoEtiqueta, color: colorAsignado, cantidad: cantidadPorEstado };
   });
 
-  // Configuración de las 4 tarjetas principales KPI
-  // Cada tarjeta es navegable (excepto presupuesto) y lleva a su módulo correspondiente
+  // Configuración de las 4 tarjetas 
+
   const tarjetasInfo = [
     {
       id: 'obras',
@@ -105,7 +89,7 @@ export default function Dashboard({ obras, personal, reportes, alNavegarPestaña
         </div>
       </header>
 
-      {/* 2. TARJETAS KPI: Renderiza 4 indicadores principales */}
+      {/*TARJETAS*/}
       {/* Las tarjetas de obras, personal y reportes son navegables */}
       <section className="dashboard-cards">
         {tarjetasInfo.map(tarjetaInfo => (
@@ -127,9 +111,9 @@ export default function Dashboard({ obras, personal, reportes, alNavegarPestaña
         ))}
       </section>
 
-      {/* 3. PANELES ANALÍTICOS: Gráfico de distribución de estados y lista de reportes recientes */}
+      {/*Gráfico de distribución de estados y lista de reportes recientes */}
       <section className="dashboard-panels">
-        {/* PANEL IZQUIERDO: Gráfico horizontal de estados con porcentajes */}
+        {/* Gráfico horizontal de estados con porcentajes */}
         <div className="panel">
           <div className="panel-header">
             <div><p className="panel-label">Distribución de Estados</p><h2>Clasificación operacional de obras</h2></div>
@@ -163,7 +147,7 @@ export default function Dashboard({ obras, personal, reportes, alNavegarPestaña
           )}
         </div>
 
-        {/* PANEL DERECHO: Últimos 3 reportes cargados (información de avance más reciente) */}
+        {/* Últimos 3 reportes cargados */}
         <div className="panel">
           <div className="panel-header panel-header--compact">
             <div><p className="panel-label">Informes Recientes</p><h2>Últimos ingresos de terreno cargados</h2></div>
@@ -195,7 +179,7 @@ export default function Dashboard({ obras, personal, reportes, alNavegarPestaña
         </div>
       </section>
 
-      {/* 4. TABLA GENERAL: Listado de todas las obras para revisión rápida y acciones */}
+      {/*Listado de todas las obras para revisión rápida y acciones */}
       <section className="dashboard-table-section">
         <div className="section-header">
           <div><p className="panel-label">Obras y Proyectos Activos</p><h2>Bandeja general de revisión directa</h2></div>

@@ -7,22 +7,8 @@ const fechaHoy = new Date().toISOString().slice(0, 10);
 
 type ReportesProps = { obras: Obra[]; reportes: Reporte[]; guardarReportes: (reportes: Reporte[]) => void };
 
-/**
- * Componente Reportes: Módulo de CRUD para reportes/bitácoras diarias.
- * 
- * Funcionalidades:
- * - useState: Controla el formulario, estado de edición, validaciones de error/éxito
- * - Crear: Nuevo reporte con obra, fecha y descripción
- * - Leer: Lista ordenada por fecha (más recientes primero)
- * - Actualizar: Edita un reporte existente
- * - Eliminar: Elimina reporte con confirmación
- * 
- * Validaciones:
- * - Obra es obligatoria y debe existir
- * - Descripción es obligatoria y no puede estar vacía
- * - La fecha no puede ser mayor al día actual (validación de negocio)
- * 
- * Persistencia: Los datos se guardan en localStorage a través de guardarReportes()
+
+ /* Persistencia: Los datos se guardan en localStorage a través de guardarReportes()
  */
 export default function Reportes({ obras, reportes, guardarReportes }: ReportesProps) {
   // id del reporte que se está editando (null => creando uno nuevo)
