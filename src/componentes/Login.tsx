@@ -10,10 +10,10 @@ const Icon = ({ children }: { children: React.ReactNode }) => (
   </svg>
 );
 export default function Login() {
-  // # PASO 1 Consumimos el estado y el método login del contexto centralizado (useAuth).
+  //Consumimos el estado y el método login del contexto centralizado (useAuth).
   const { login, errorLogin, estaAutenticado } = useAuth();
 
-  // # PASO 2 Estados locales mediante useState para capturar la escritura de credenciales.
+  //  Estados locales mediante useState para capturar la escritura de credenciales.
   const [credencialesUsuario, setCredencialesUsuario] = useState({ correo: 'admin@admin.com', clave: '123456' });
   const [mostrarContrasena, setMostrarContrasena] = useState(false);
   const [errorValidacionLocal, setErrorValidacionLocal] = useState<string | null>(null);
@@ -21,7 +21,7 @@ export default function Login() {
   const navigate = useNavigate();
   const errorTexto = errorValidacionLocal || errorLogin;
 
-  // # PASO 3 useEffect vigilante que si detecta sesión activa, te redirige al dashboard automáticamente.
+  // useEffect vigilante que si detecta sesión activa, te redirige al dashboard automáticamente.
   useEffect(() => {
     if (estaAutenticado) navigate('/dashboard');
   }, [estaAutenticado, navigate]);
@@ -29,12 +29,12 @@ export default function Login() {
   const manejarCambioInput = ({ target: { name, value } }: React.ChangeEvent<HTMLInputElement>) =>
     setCredencialesUsuario(prev => ({ ...prev, [name]: value }));
 
-  // onSubmit: valida y delega el login al contexto
+  // valida y delega el login al contexto
   const manejarEnvio = (e: React.FormEvent) => {
     e.preventDefault();
     const correoLimpio = credencialesUsuario.correo.trim();
 
-    // # PASO 4 Validaciones de formato previo en el lado del cliente (Validación de correo/longitud).
+    // Validaciones de formato previo en el lado del cliente (Validación de correo/longitud).
     if (!correoLimpio.includes('@') || !correoLimpio.includes('.')) {
       setErrorValidacionLocal('Formato de correo electrónico inválido.');
       return;
@@ -45,7 +45,7 @@ export default function Login() {
       return;
     }
 
-    // # PASO 5 Si pasa los filtros, se dispara la función login del contexto (login(correo, clave)).
+    // Si pasa los filtros, se dispara la función login del contexto (login(correo, clave)).
     if (login(correoLimpio, credencialesUsuario.clave)) {
       navigate('/dashboard');
     } else {

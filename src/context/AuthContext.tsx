@@ -5,6 +5,7 @@ const CLAVE_SESION = 'hexacall_sesion';
 
 const USUARIOS_PREDETERMINADOS = [
   { correo: 'admin@admin.com', clave: '123456', nombre: 'Luis Alberto Rojas', rol: 'administrador' },
+  { correo: 'admin@loco.com', clave: '123456', nombre: 'jorge', rol: 'loco' },
 ];
 
 interface AuthContextType {
@@ -15,7 +16,7 @@ interface AuthContextType {
   errorLogin: string | null;
 }
 
-// # PASO 1 Se crea el contexto global para almacenar la sesión (createContext).
+//  Se crea el contexto global para almacenar la sesión (createContext).
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const cargarSesionDesdeStorage = () => {
@@ -28,11 +29,11 @@ const cargarSesionDesdeStorage = () => {
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // # PASO 2 Estado principal que intenta rescatar la sesión desde el almacenamiento del navegador (useState + localStorage).
+  // Estado principal que intenta rescatar la sesión desde el almacenamiento del navegador (useState + localStorage).
   const [usuario, setUsuario] = useState<SesionUsuario | null>(cargarSesionDesdeStorage);
   const [errorLogin, setErrorLogin] = useState<string | null>(null);
 
-  // # PASO 3 Función login que busca coincidencia de credenciales en el arreglo.
+  //  Función login que busca coincidencia de credenciales en el arreglo.
   const login = (correoIngresado: string, claveIngresada: string): boolean => {
     setErrorLogin(null);
     const correoNormalizado = correoIngresado.trim().toLowerCase();
@@ -49,20 +50,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       rol: usuarioEncontrado.rol,
     };
 
-    // # PASO 3.1 Se persiste el usuario en el navegador y se actualiza el estado reactivo (localStorage.setItem y setUsuario).
+    // Se persiste el usuario en el navegador y se actualiza el estado reactivo (localStorage.setItem y setUsuario).
     localStorage.setItem(CLAVE_SESION, JSON.stringify(datosSesionUsuario));
     setUsuario(datosSesionUsuario);
     return true;
   };
 
-  // # PASO 4 Función logout que remueve todo rastro de la sesión actual (Definición de logout).
+  // Función logout que remueve todo rastro de la sesión actual (Definición de logout).
   const logout = () => {
     localStorage.removeItem(CLAVE_SESION);
     setUsuario(null);
     setErrorLogin(null);
   };
 
-  // # PASO 5 Compartimos el estado 'usuario' y las funciones al resto de la app (AuthContext.Provider).
+  // Compartimos el estado 'usuario' y las funciones al resto de la app (AuthContext.Provider).
   return (
     <AuthContext.Provider value={{ usuario, estaAutenticado: Boolean(usuario), login, logout, errorLogin }}>
       {children}

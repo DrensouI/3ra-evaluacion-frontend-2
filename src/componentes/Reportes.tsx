@@ -113,7 +113,7 @@ export default function Reportes({ obras, reportes, guardarReportes }: ReportesP
       </header>
 
       <section className="reportes-paneles">
-        {/* PANEL IZQUIERDO: Formulario de creación/edición de reportes */}
+        {/*Formulario de creación/edición de reportes */}
         <div className="reportes-creacion">
           <div className="reportes-creacion-top">
             <h2>{estaEnEdicion ? 'Editar informe' : 'Nuevo informe'}</h2>
@@ -122,7 +122,7 @@ export default function Reportes({ obras, reportes, guardarReportes }: ReportesP
             {alerta && <div className={`alert-box ${alerta.tipo === 'success' ? 'alert-success' : ''}`}>{alerta.texto}</div>}
           </div>
 
-          {/* Formulario controlado con useState: todos los campos actualizan el estado en tiempo real */}
+          {/*Formulario controlado con useState: todos los campos actualizan el estado en tiempo real */}
           <form onSubmit={manejarEnvio} className="reportes-form">
             <label htmlFor="reporte-obra">Obra</label>
             <select id="reporte-obra" value={formulario.obraId} onChange={e => setFormulario(prev => ({ ...prev, obraId: e.target.value }))} disabled={!obrasDisponibles}>
@@ -142,7 +142,7 @@ export default function Reportes({ obras, reportes, guardarReportes }: ReportesP
           </form>
         </div>
 
-        {/* PANEL DERECHO: Listado de reportes con acciones CRUD */}
+        {/* Listado de reportes con acciones CRUD */}
         <div className="reportes-listado">
           <div className="reportes-listado-header">
             <h2>Informes creados</h2>

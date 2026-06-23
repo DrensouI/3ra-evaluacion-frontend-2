@@ -10,6 +10,7 @@ Una vez adentro
 ir al directorio de la carpeta y ejecutar cd con la ubicacion de donde esta la carpeta con el codigp
 
 Instalar dependencias:
+winget install OpenJS.NodeJS.LTS
 
 npm install y npm run dev
 
